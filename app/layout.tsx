@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { ToastProvider } from "@/components/Toasts/ToastProvider";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,10 +30,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="mx-auto max-w-screen-lg h-screen flex flex-col">
-          <Navbar />
-          <div className="flex-grow">{children}</div>
-        </div>
+        <ToastProvider> {/* 👈 Wrap your entire app here */}
+          <div className="mx-auto max-w-screen-lg h-screen flex flex-col">
+            <Navbar />
+            <div className="flex-grow">{children}</div>
+          </div>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -55,47 +55,49 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signIn(formData: FormData) {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    const credentials = {
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
+  const credentials = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
+  const { error, data } = await supabase.auth.signInWithPassword(credentials);
+
+  if (error) {
+    return {
+      status: error?.message,
+      user: null,
     };
+  }
 
-    const { error, data } = await supabase.auth.signInWithPassword(credentials);
+  // Check if user exists in user_profiles
+  const { data: existingUser } = await supabase
+    .from("user_profile")
+    .select("*")
+    .eq("email", credentials.email)
+    .limit(1)
+    .single();
 
-    if (error) {
-        return {
-            status: error?.message,
-            user: null,
-        };
+  if (!existingUser) {
+    const { error: innerError } = await supabase.from("user_profile").insert({
+      email: data.user.email,
+      username: data.user?.user_metadata?.username,
+    });
+
+    // ⚡ Ignore duplicate key error and continue
+    if (innerError && !innerError.message.includes("duplicate key value")) {
+      return {
+        status: innerError.message,
+        user: null,
+      };
     }
+  }
 
-    // Check if user exists in user_profiles
-    const { data: existingUser } = await supabase
-        .from("user_profile")
-        .select("*")
-        .eq("email", credentials?.email)
-        .limit(1)
-        .single();
-
-    if (!existingUser) {
-        const { error: innerError } = await supabase.from("user_profile").insert({
-            email: data?.user.email,
-            username: data?.user?.user_metadata?.username,
-        });
-
-        if (innerError) {
-            return {
-                status: innerError?.message,
-                user: null,
-            };
-        }
-    }
-
-    revalidatePath("/", "layout");
-    return { status: "success", user: data.user };
+  revalidatePath("/", "layout");
+  return { status: "success", user: data.user };
 }
+
 
 export async function signOut() {
     const supabase = await createClient();
