@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/actions/auth";
+import { signIn, signInWithOtp } from "@/actions/auth";
 import { useToast } from "./Toasts/ToastProvider";
-
 
 export default function LoginForm() {
   const router = useRouter();
@@ -17,7 +16,6 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const formData = new FormData();
       formData.append("email", email);
@@ -26,25 +24,46 @@ export default function LoginForm() {
       const result = await signIn(formData);
 
       if (result.user) {
-        addToast("Logged in successfully ", "success");
+        addToast("Logged in successfully ✅", "success");
         router.push("/");
       } else {
         addToast(result.status || "Login failed ❌", "error");
       }
     } catch (err) {
-      console.error("Unexpected login error:", err);
+      console.error(err);
       addToast("Something went wrong ❌", "error");
     } finally {
       setLoading(false);
     }
   };
 
+const handleOtpLogin = async () => {
+  if (!email) {
+    addToast("Please enter your email to receive OTP ❌", "error");
+    return;
+  }
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("email", email);
+    const res = await signInWithOtp(formData);
+    if (res.status === "OTP sent to your email") {
+      addToast(res.status, "success");
+      // Store email for OTP verification page
+      localStorage.setItem("otp_email", email);
+      router.push("/otp");
+    } else {
+      addToast(res.status || "Failed to send OTP ❌", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    addToast("Something went wrong ❌", "error");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 p-6 bg-white rounded-lg shadow-md max-w-md "
-    >
-      
+    <form className="space-y-4 p-6 bg-white rounded-lg shadow-md max-w-md">
       <div>
         <label className="block text-sm font-medium">Email</label>
         <input
@@ -69,10 +88,20 @@ export default function LoginForm() {
 
       <button
         type="submit"
+        onClick={handleSubmit}
         disabled={loading}
         className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
       >
         {loading ? "Logging in..." : "Login"}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleOtpLogin}
+        disabled={loading}
+        className="w-full py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 mt-2"
+      >
+        {loading ? "Sending OTP..." : "Sign in with OTP"}
       </button>
     </form>
   );
