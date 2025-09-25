@@ -15,9 +15,7 @@ export async function getUserSession() {
         status: "success",
         user: data?.user
     }
-
 }
-
 export async function signUp(formData: FormData) {
     const supabase = await createClient();
 
@@ -69,7 +67,6 @@ export async function signIn(formData: FormData) {
             user: null,
         };
     }
-
     // Check if user exists in user_profiles
     const { data: existingUser } = await supabase
         .from("user_profile")
@@ -149,7 +146,6 @@ export async function resetPassword(formData: FormData, code: string) {
     if (codeError) {
         return { status: codeError.message };
     }
-
     // update password
     const { error } = await supabase.auth.updateUser({
         password: formData.get("password") as string,
