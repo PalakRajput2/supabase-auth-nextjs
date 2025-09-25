@@ -99,16 +99,11 @@ export async function signIn(formData: FormData) {
 }
 
 
+
 export async function signOut() {
-    const supabase = await createClient();
-
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-        redirect("/error")
-    }
-    revalidatePath("/", "layout")
-    redirect("/login");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
+  return { error };
 }
 
 
