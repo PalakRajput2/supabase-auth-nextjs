@@ -1,40 +1,61 @@
 "use client";
-import React, { useState } from "react";
-import AuthButton from "./AuthButton";
 
-const ForgotPassword = () => {
+import React, { useState } from "react";
+import { forgotPassword } from "@/actions/auth";
+
+export default function ForgotPasswordPage() {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState(false);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(false);
+
+    const formData = new FormData(event.currentTarget);
+    const result = await forgotPassword(formData);
+
+    if (result.status === "success") {
+      setSuccess(true);
+    } else {
+      setError(result.status);
+    }
 
     setLoading(false);
   };
+
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-200">
-            Email
-          </label>
+    <div className="max-w-md mt-12">
+     
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <label className="text-sm font-medium text-gray-700">
+          Email
           <input
             type="email"
-            placeholder="Email"
-            id="Email"
             name="email"
-            className="mt-1 w-full px-4 p-2  h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
+            required
+            placeholder="Enter your email"
+            className="mt-1 w-full px-3 py-2 border rounded-md"
           />
-        </div>
+        </label>
 
-        <div className="mt-4">
-          <AuthButton type="Forgot Password" loading={loading} />
-        </div>
-        {error && <p className="text-red-500">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white py-2 px-4 rounded-md"
+        >
+          {loading ? "Sending..." : "Send Reset Link"}
+        </button>
       </form>
+
+      {error && <p className="text-red-500 mt-3">{error}</p>}
+      {success && (
+        <p className="text-green-600 mt-3">
+          ✅ Password reset link sent to your email.
+        </p>
+      )}
     </div>
   );
-};
-
-export default ForgotPassword;
+}

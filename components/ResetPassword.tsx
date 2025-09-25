@@ -1,43 +1,83 @@
 "use client";
-import React, { useState } from "react";
-import AuthButton from "./AuthButton";
-// import { useRouter, useSearchParams } from "next/navigation";
 
-const ResetPassword = () => {
-  // const searchParams = useSearchParams();
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { resetPassword } from "@/actions/auth";
+
+export default function ResetPasswordPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  // const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const [loading, setLoading] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const code = searchParams.get("code"); 
+
+  useEffect(() => {
+    const err = searchParams.get("error_description");
+    if (err) setError(err);
+  }, [searchParams]);
+
+  useEffect(() => {
+    passwordRef.current?.focus();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!code) {
+      setError("Invalid or missing reset code");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
+    const formData = new FormData(e.currentTarget);
+    const result = await resetPassword(formData, code);
+
+    if (result.status === "success") {
+      router.push("/login?message=reset_success");
+    } else {
+      setError(result.status);
+    }
+
     setLoading(false);
   };
-  return (
-    <div>
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-200">
-            New Password
-          </label>
-          <input
-            type="password"
-            placeholder="Password"
-            id="Password"
-            name="password"
-            className="mt-1 w-full px-4 p-2  h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
-          />
-        </div>
 
-        <div className="mt-4">
-          <AuthButton type="Reset Password" loading={loading} />
+  return (
+    <div className="max-w-md mt-12">
+      {error ? (
+        <div className="text-red-600 mt-4">
+          {error} <br />
+          <button
+            onClick={() => router.push("/forgot-password")}
+            className="mt-2 underline text-blue-600"
+          >
+            Request a new reset link
+          </button>
         </div>
-        {error && <p className="text-red-500">{error}</p>}
-      </form>
+      ) : (
+        <form className="flex flex-col gap-4 mt-4" onSubmit={handleSubmit}>
+          <label className="text-sm font-medium">New Password</label>
+          <input
+            ref={passwordRef}
+            type="password"
+            name="password"
+            required
+            className="px-3 py-2 border rounded-md"
+            placeholder="Enter new password"
+          />
+          <button
+            type="submit"
+            disabled={loading || !code}
+            className={`py-2 rounded-md text-white ${
+              loading || !code ? "bg-gray-400" : "bg-blue-600"
+            }`}
+          >
+            {loading ? "Resetting..." : "Reset Password"}
+          </button>
+        </form>
+      )}
     </div>
   );
-};
-
-export default ResetPassword;
+}

@@ -2,7 +2,8 @@ import ClientComponent from "@/components/ClientComponent";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex  flex-col items-start justify-between p-10 ">
+     <p className="mb-3 font-bold text-[23px] "> Profile Page  </p>
       <ClientComponent />
     </main>
   );
