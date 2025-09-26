@@ -22,7 +22,7 @@ const SignUpForm = () => {
       addToast("Account created successfully 🎉 Please login.", "success");
       router.push("/login");
     } else {
-      addToast(result.status || "Signup failed ❌", "error");
+      addToast(result.status || "Signup failed ", "error");
     }
 
     setLoading(false);
@@ -67,7 +67,7 @@ const SignUpForm = () => {
             className="mt-1 w-full px-4 p-2 h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
           />
         </div>
-        <div className="mt-4">
+        <div className="mt-2">
           <AuthButton type="Sign up" loading={loading} />
         </div>
       </form>

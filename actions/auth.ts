@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 
+
 export async function getUserSession() {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.getUser();
@@ -116,6 +117,7 @@ export async function signInWithGithub() {
 
     } else if (data.url) {
         return redirect(data.url)
+    
     }
 }
 
@@ -157,20 +159,6 @@ export async function resetPassword(formData: FormData, code: string) {
     return { status: "success" };
 }
 
-export async function signInWithGoogle() {
-    const supabase = await createClient();
-    const origin = (await headers()).get("origin");
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-
-            redirectTo: `${origin}/reset-password`,
-        },
-    });
-
-    return { data, error };
-}
 
 
 /** Send OTP email (6-digit code) */
@@ -264,4 +252,30 @@ export async function resendOtp(email: string) {
   }
 
   return { status: "OTP resent successfully", data };
+}
+
+
+
+export async function signInWithGoogle() {
+  const origin = (await headers()).get("origin");
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    console.error("Google sign-in error:", error);
+    return { success: false, message: error.message };
+  }
+
+  // Return the URL for client-side redirect instead of using redirect()
+  return { 
+    success: true, 
+    message: "Redirecting to Google...", 
+    redirectUrl: data?.url 
+  };
 }

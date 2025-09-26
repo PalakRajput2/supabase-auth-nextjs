@@ -1,23 +1,29 @@
 "use client";
+
 import React, { useState } from "react";
-
-import { signInWithGoogle } from "@/actions/auth";
 import { useToast } from "./Toasts/ToastProvider";
-import { FaGoogle, FaGoogleDrive } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
+import { signInWithGoogle } from "@/actions/auth";
 
-export default function GoogleSignUpButton() {
+export default function SigninGoogle() {
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignUp = async () => {
     setLoading(true);
     try {
-      const { data, error } = await signInWithGoogle();
-      if (error) {
-        console.error("Google sign-in error:", error);
-        addToast("Failed to sign in with Google.", "error");
-      } else {
-        addToast("Redirecting to Google...", "success");
+      const result = await signInWithGoogle();
+
+      if (result?.success && result.redirectUrl) {
+           addToast("Redirecting to Google...", "success"); 
+        // Client-side redirect
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
+
+      if (!result?.success) {
+        addToast(result?.message || "Failed to sign in with Google", "error");
       }
     } catch (err) {
       console.error(err);
@@ -28,15 +34,12 @@ export default function GoogleSignUpButton() {
   };
 
   return (
-
-       <div
-          onClick={handleGoogleSignUp}
-          className="w-full gap-3 hover:cursor-pointer mt-6 h-12 bg-green-600 rounded-md p-4 flex justify-center items-center"
-        >
-          <FaGoogle className="text-white" />
-          <p className="text-white">
-            {loading ? "Redirecting..." : "Signup with Google"}
-          </p>
-        </div>
+    <div
+      onClick={handleGoogleSignUp}
+      className="w-full gap-3 hover:cursor-pointer mt-4 h-12 bg-green-600 rounded-md p-3 flex justify-center items-center"
+    >
+      <FaGoogle className="text-white" />
+      <p className="text-white">{loading ? "Redirecting..." : "Signup with Google"}</p>
+    </div>
   );
 }
