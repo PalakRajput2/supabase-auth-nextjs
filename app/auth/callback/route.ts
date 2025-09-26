@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         }
       }
 
-      // ✅ Always redirect on success (user exists or inserted)
+      //  Always redirect on success (user exists or inserted)
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
 

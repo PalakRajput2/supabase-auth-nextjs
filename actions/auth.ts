@@ -81,7 +81,7 @@ export async function signIn(formData: FormData) {
             username: data.user?.user_metadata?.username,
         });
 
-        // ⚡ Ignore duplicate key error and continue
+        //  Ignore duplicate key error and continue
         if (innerError && !innerError.message.includes("duplicate key value")) {
             return {
                 status: innerError.message,
@@ -207,7 +207,7 @@ export async function verifyOtp(formData: FormData) {
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: 'email', // Make sure this is explicitly set
+      type: 'email', 
     });
 
     if (error) {
@@ -219,7 +219,7 @@ export async function verifyOtp(formData: FormData) {
       return { status: "User not found after OTP verification", user: null };
     }
 
-    // Optional: insert into user_profile table if not exists
+    // insert into user_profile table if not exists
     const { data: existingUser } = await supabase
       .from("user_profile")
       .select("*")
@@ -241,4 +241,27 @@ export async function verifyOtp(formData: FormData) {
     console.error('Unexpected error in verifyOtp:', error);
     return { status: "An unexpected error occurred", user: null };
   }
+}
+
+
+/** Resend OTP email */
+export async function resendOtp(email: string) {
+  const supabase = await createClient();
+
+  if (!email) {
+    return { status: "Email is required" };
+  }
+
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+    },
+  });
+
+  if (error) {
+    return { status: error.message };
+  }
+
+  return { status: "OTP resent successfully", data };
 }

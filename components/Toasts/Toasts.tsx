@@ -1,7 +1,7 @@
-// components/Toast/Toast.tsx
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 export interface ToastProps {
   id: string;
@@ -18,18 +18,33 @@ const Toast: React.FC<ToastProps> = ({
   duration = 4000,
   onClose,
 }) => {
+  const [closing, setClosing] = useState(false);
+
   useEffect(() => {
-    const timer = setTimeout(() => onClose(id), duration);
+    const timer = setTimeout(() => handleClose(), duration);
     return () => clearTimeout(timer);
-  }, [duration, id, onClose]);
+  }, [duration]);
+
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(() => onClose(id), 300); 
+  };
 
   const bgColor = type === "success" ? "bg-green-500" : "bg-red-500";
 
   return (
     <div
-      className={`px-4 py-2 rounded-md text-white shadow-lg ${bgColor} animate-slide-in`}
+      className={`flex items-center justify-between gap-2 px-4 py-2 rounded-md text-white shadow-lg ${bgColor} ${
+        closing ? "animate-slide-up-fade-out" : "animate-slide-down-fade-in"
+      }`}
     >
-      {message}
+      <span>{message}</span>
+      <button
+        onClick={handleClose}
+        className="ml-2 text-white hover:text-gray-200 focus:outline-none"
+      >
+        <X size={16} />
+      </button>
     </div>
   );
 };

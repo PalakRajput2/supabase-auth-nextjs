@@ -8,9 +8,10 @@ export default function LoginPage() {
     <>
       <div className="w-full flex mt-20 justify-center">
         <section className="flex flex-col w-[400px]">
-          <h1 className="text-3xl w-full text-center font-bold mb-6">
+          <h1 className="text-3xl w-full text-center font-bold mb-5">
             Sign in
           </h1>
+          <p className="text-sm pb-4 text-center w-full">Sign in to your account to access the application </p>
           <LoginForm />
           <LoginGithub />
           

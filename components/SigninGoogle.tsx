@@ -3,6 +3,7 @@ import React, { useState } from "react";
 
 import { signInWithGoogle } from "@/actions/auth";
 import { useToast } from "./Toasts/ToastProvider";
+import { FaGoogle, FaGoogleDrive } from "react-icons/fa";
 
 export default function GoogleSignUpButton() {
   const { addToast } = useToast();
@@ -27,12 +28,15 @@ export default function GoogleSignUpButton() {
   };
 
   return (
-    <button
-      onClick={handleGoogleSignUp}
-      disabled={loading}
-      className=" flex justify-center items-center gap-2 px-8 mt-4 py-2 bg-green-500 text-center text-white rounded-md hover:bg-green-600 transition"
-    >
-      {loading ? "Redirecting..." : "Sign up with Google"}
-    </button>
+
+       <div
+          onClick={handleGoogleSignUp}
+          className="w-full gap-3 hover:cursor-pointer mt-6 h-12 bg-green-600 rounded-md p-4 flex justify-center items-center"
+        >
+          <FaGoogle className="text-white" />
+          <p className="text-white">
+            {loading ? "Redirecting..." : "Signup with Google"}
+          </p>
+        </div>
   );
 }

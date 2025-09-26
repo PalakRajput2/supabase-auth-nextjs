@@ -1,5 +1,5 @@
 
-import OtpPage from '@/components/OtpPage'
+import OtpPage from '@/components/OTP/OtpPage'
 import React from 'react'
 
 const page = () => {
