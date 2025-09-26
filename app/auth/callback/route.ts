@@ -50,31 +50,35 @@ export async function GET(request: Request) {
       .single()
 
     if (!existingUser) {
-      const { error: dbError } = await supabase.from('user_profile').insert({
-        email: userData.user.email,
-        username: userData.user.user_metadata?.username || userData.user.email?.split('@')[0],
-      })
+  const { error: dbError } = await supabase.from("user_profile").insert({
+    email: userData.user.email,
+    username:
+      userData.user.user_metadata?.username ||
+      userData.user.email?.split("@")[0],
+  });
 
-      if (dbError) {
-        console.error('Error inserting user data:', dbError.message)
-        // Don't redirect to error page - just log and continue
-        // User can complete profile later
-      }
-    }
+  if (dbError && !dbError.message.includes("duplicate key")) {
+    console.error("Error inserting user data:", dbError.message);
+  }
+}
+
 
     // Redirect on success
     const forwardedHost = request.headers.get('x-forwarded-host')
     const isLocalEnv = process.env.NODE_ENV === 'development'
 
-   // Redirect on success with a query param for toast notification
-if (isLocalEnv) {
-  return NextResponse.redirect(`${origin}${next}?signup=success`)
-} else if (forwardedHost) {
-  return NextResponse.redirect(`https://${forwardedHost}${next}?signup=success`)
-} else {
-  return NextResponse.redirect(`${origin}${next}?signup=success`)
-}
+  const successRedirectUrl = new URL(`${origin}${next}`);
+successRedirectUrl.searchParams.set("login", "success");
 
+if (isLocalEnv) {
+  return NextResponse.redirect(successRedirectUrl.toString());
+} else if (forwardedHost) {
+  successRedirectUrl.host = forwardedHost;
+  successRedirectUrl.protocol = "https:";
+  return NextResponse.redirect(successRedirectUrl.toString());
+} else {
+  return NextResponse.redirect(successRedirectUrl.toString());
+}
 
   } catch (err) {
     console.error('Unexpected error in auth callback:', err)

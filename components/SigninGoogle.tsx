@@ -15,13 +15,11 @@ export default function SigninGoogle() {
       const result = await signInWithGoogle();
 
       if (result?.success && result.redirectUrl) {
-           addToast("Redirecting to Google...", "success"); 
+        addToast("Redirecting to Google...", "success");
         // Client-side redirect
         window.location.href = result.redirectUrl;
         return;
       }
-
-
       if (!result?.success) {
         addToast(result?.message || "Failed to sign in with Google", "error");
       }
